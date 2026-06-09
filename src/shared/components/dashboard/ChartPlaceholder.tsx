@@ -19,7 +19,7 @@ export function ChartPlaceholder({
       <CardContent>
         <div className="flex h-48 items-end gap-2 rounded-lg border border-dashed border-border bg-muted p-4">
           {variant === 'donut' ? (
-            <div className="m-auto size-28 rounded-full border-[22px] border-blue-500 border-r-blue-200 border-t-blue-300" />
+            <div className="m-auto size-28 rounded-full border-22 border-blue-500 border-r-blue-200 border-t-blue-300" />
           ) : (
             Array.from({ length: 8 }).map((_, index) => (
               <div

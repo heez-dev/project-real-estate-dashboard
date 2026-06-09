@@ -52,7 +52,10 @@ export default function DesignSystemPage() {
                 조회
               </Button>
             </ButtonRow>
-            <ButtonRow description="보조 실행, 다운로드, 뒤로가기" label="outline">
+            <ButtonRow
+              description="보조 실행, 다운로드, 뒤로가기"
+              label="outline"
+            >
               <Button variant="outline">
                 <Download className="size-4" aria-hidden="true" />
                 CSV
@@ -67,7 +70,10 @@ export default function DesignSystemPage() {
             <ButtonRow description="삭제, 취소, 위험 액션" label="destructive">
               <Button variant="destructive">Destructive</Button>
             </ButtonRow>
-            <ButtonRow description="문장 안 링크 또는 낮은 단계 이동" label="link">
+            <ButtonRow
+              description="문장 안 링크 또는 낮은 단계 이동"
+              label="link"
+            >
               <Button variant="link">Link</Button>
             </ButtonRow>
           </CardContent>
@@ -185,7 +191,7 @@ function Section({
 }) {
   return (
     <section className="grid gap-3">
-      <h2 className="text-[22px] font-bold leading-[30px] text-foreground">
+      <h2 className="text-[22px] font-bold leading-7.5 text-foreground">
         {title}
       </h2>
       {children}
