@@ -5,6 +5,11 @@ import type {
   ApartmentTradeSearchParams,
   PublicDataResponseHeader,
 } from "@/src/entities/apartment-trade/model/apartment-trade";
+import type {
+  PublicDataApartmentTradeRawItem,
+  PublicDataListResponse,
+  PublicDataResponseHeader as RawPublicDataResponseHeader,
+} from "@/src/entities/apartment-trade/model/public-data-apartment-trade";
 
 const parser = new XMLParser({
   ignoreAttributes: false,
@@ -13,32 +18,13 @@ const parser = new XMLParser({
   trimValues: true,
 });
 
-type ParsedPublicDataResponse = {
-  response?: {
-    body?: {
-      items?: {
-        item?: unknown;
-      };
-      numOfRows?: string;
-      pageNo?: string;
-      totalCount?: string;
-    };
-    header?: {
-      resultCode?: string;
-      resultMsg?: string;
-    };
-  };
-};
-
-type ParsedPublicDataResponseHeader = NonNullable<
-  ParsedPublicDataResponse["response"]
->["header"];
-
 export function parseApartmentTradeResponse(
   xmlText: string,
   params: ApartmentTradeSearchParams,
 ): ApartmentTradeSearchResult {
-  const parsed = parser.parse(xmlText) as ParsedPublicDataResponse;
+  const parsed = parser.parse(
+    xmlText,
+  ) as PublicDataListResponse<PublicDataApartmentTradeRawItem>;
   const response = parsed.response;
   const header = normalizeHeader(response?.header);
 
@@ -63,7 +49,7 @@ export function parseApartmentTradeResponse(
 }
 
 function normalizeHeader(
-  header: ParsedPublicDataResponseHeader,
+  header: RawPublicDataResponseHeader | undefined,
 ): PublicDataResponseHeader {
   return {
     resultCode: String(header?.resultCode ?? ""),
@@ -86,14 +72,12 @@ function normalizeApartmentTrade(
   const dealDay = toNumber(read(item, "dealDay", "일"));
   const exclusiveArea = toNumber(read(item, "excluUseAr", "전용면적"));
 
-  return {
+  const commonTrade = {
     apartmentName,
     buildYear: toNumber(read(item, "buildYear", "건축년도")),
-    dealAmount: toAmount(read(item, "dealAmount", "거래금액")),
     dealDay,
     dealMonth,
     dealYear,
-    depositAmount: toAmount(read(item, "deposit", "보증금액")),
     exclusiveArea,
     floor: toNumber(read(item, "floor", "층")),
     // API가 안정적인 공통 row id를 제공하지 않아 검색 범위와 주요 식별 필드로 조합한다.
@@ -112,10 +96,28 @@ function normalizeApartmentTrade(
     ].join("-"),
     jibun,
     legalDong,
-    monthlyRent: toAmount(read(item, "monthlyRent", "월세금액")),
-    // 실제 응답 필드 검증이 끝날 때까지 원본 row를 함께 보관한다.
-    raw: item,
     regionalCode: read(item, "sggCd", "지역코드"),
+  };
+
+  if (params.tradeType === "rent") {
+    return {
+      ...commonTrade,
+      dealAmount: null,
+      depositAmount: toAmount(read(item, "deposit", "보증금액")),
+      monthlyRent: toAmount(read(item, "monthlyRent", "월세금액")),
+      // 실제 응답 필드 검증이 끝날 때까지 원본 row를 함께 보관한다.
+      raw: toRawItem(item),
+      tradeType: params.tradeType,
+    };
+  }
+
+  return {
+    ...commonTrade,
+    dealAmount: toAmount(read(item, "dealAmount", "거래금액")),
+    depositAmount: null,
+    monthlyRent: null,
+    // 실제 응답 필드 검증이 끝날 때까지 원본 row를 함께 보관한다.
+    raw: toRawItem(item),
     tradeType: params.tradeType,
   };
 }
@@ -147,6 +149,12 @@ function toStringRecord(value: unknown) {
       String(itemValue ?? "").trim(),
     ]),
   );
+}
+
+function toRawItem(
+  value: Record<string, string>,
+): PublicDataApartmentTradeRawItem {
+  return value;
 }
 
 function toAmount(value: string) {
