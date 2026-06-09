@@ -1,12 +1,10 @@
-import {
-  APARTMENT_TRADE_ENDPOINTS,
-  getPublicDataServiceKey,
-} from "@/src/entities/apartment-trade/api/public-data-config";
+import { APARTMENT_TRADE_ENDPOINTS } from "@/src/entities/apartment-trade/api/public-data-config";
 import { parseApartmentTradeResponse } from "@/src/entities/apartment-trade/api/parse-apartment-trade-response";
 import type {
   ApartmentTradeSearchParams,
   ApartmentTradeSearchResult,
 } from "@/src/entities/apartment-trade/model/apartment-trade";
+import { getPublicDataServiceKey } from "@/src/shared/api/public-data-service-key";
 
 export type FetchApartmentTradesParams = ApartmentTradeSearchParams & {
   numOfRows?: number;
