@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
+import { AppToaster } from "@/src/shared/components/feedback/AppToaster";
 import { ThemeProvider } from "@/src/shared/providers/theme-provider";
 
 function createQueryClient() {
@@ -25,7 +26,10 @@ export function AppProviders({ children }: AppProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>{children}</ThemeProvider>
+      <ThemeProvider>
+        {children}
+        <AppToaster />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

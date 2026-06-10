@@ -17,6 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 
 export type ComboboxOption = {
@@ -34,6 +35,7 @@ type ComboboxProps = {
   searchPlaceholder?: string;
   emptyMessage?: string;
   disabled?: boolean;
+  isLoading?: boolean;
   className?: string;
   contentClassName?: string;
 };
@@ -43,6 +45,7 @@ function Combobox({
   contentClassName,
   disabled,
   emptyMessage = '검색 결과가 없습니다.',
+  isLoading = false,
   onValueChange,
   options,
   placeholder = '선택하세요',
@@ -74,10 +77,14 @@ function Combobox({
           >
             {selectedOption?.label ?? placeholder}
           </span>
-          <ChevronsUpDownIcon
-            className="size-4 shrink-0 text-muted-foreground"
-            aria-hidden="true"
-          />
+          {isLoading ? (
+            <Spinner className="size-4 shrink-0" aria-label="옵션 로딩 중" />
+          ) : (
+            <ChevronsUpDownIcon
+              className="size-4 shrink-0 text-muted-foreground"
+              aria-hidden="true"
+            />
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent

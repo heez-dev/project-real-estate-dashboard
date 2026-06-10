@@ -3,8 +3,7 @@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-
-export type TransactionType = 'all' | 'sale' | 'jeonse' | 'monthly-rent';
+import { TransactionType } from '@/src/shared/model/transaction-type-model';
 
 type TransactionTypeOption = {
   label: string;

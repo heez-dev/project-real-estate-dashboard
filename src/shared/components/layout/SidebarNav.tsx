@@ -49,7 +49,7 @@ export function SidebarNav() {
           );
         })}
       </nav>
-      <div className="flex items-center gap-1 border-t border-sidebar-border p-3">
+      <div className="h-12 flex items-center gap-1 border-t border-sidebar-border p-3">
         <DesignSystemLink />
         <ThemeToggle />
       </div>
