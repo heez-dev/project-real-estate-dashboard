@@ -12,7 +12,7 @@ export function SidebarNav() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex lg:w-64 lg:flex-col">
+    <aside className="sticky top-0 hidden h-dvh shrink-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex lg:w-64 lg:flex-col">
       <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-5">
         <div className="flex size-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300">
           <Building2 className="size-5" aria-hidden="true" />
