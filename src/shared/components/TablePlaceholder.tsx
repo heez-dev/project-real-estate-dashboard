@@ -24,7 +24,7 @@ export function TablePlaceholder({ title }: TablePlaceholderProps) {
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left text-sm">
+          <table className="w-full min-w-160 text-left text-sm">
             <thead className="border-b border-border text-xs text-muted-foreground">
               <tr>
                 <th className="py-2 font-medium">거래유형</th>
