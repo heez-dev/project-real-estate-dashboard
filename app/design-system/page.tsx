@@ -2,21 +2,24 @@ import { Download, FileSpreadsheet, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Combobox } from '@/components/ui/combobox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { ChartPlaceholder } from '@/src/shared/components/dashboard/ChartPlaceholder';
-import { DetailInfoCard } from '@/src/shared/components/dashboard/DetailInfoCard';
-import { FilterBarShell } from '@/src/shared/components/dashboard/FilterBarShell';
-import { KpiCard } from '@/src/shared/components/dashboard/KpiCard';
-import { TablePlaceholder } from '@/src/shared/components/dashboard/TablePlaceholder';
 import { colorTokens } from '@/src/shared/constants/design-tokens';
+import { DatePicker } from '@/components/ui/date-picker';
+import { ChartPlaceholder } from '@/src/shared/components/ChartPlaceholder';
+import { TablePlaceholder } from '@/src/shared/components/TablePlaceholder';
+import { KpiCard } from '@/src/shared/components/card/KpiCard';
+import { DetailInfoCard } from '@/src/shared/components/card/DetailInfoCard';
+import { TransactionTypeSelector } from '@/src/shared/components/filter/TransactionTypeSelector';
+import { LocationSelector } from '@/src/shared/components/filter/LocationSelector';
+import { ContractMonthPicker } from '@/src/shared/components/filter/ContractMonthPicker';
+
+const regionOptions = [
+  { label: '서울특별시', value: '11', keywords: ['서울'] },
+  { label: '경기도', value: '41', keywords: ['경기'] },
+  { label: '부산광역시', value: '26', keywords: ['부산'] },
+] as const;
 
 export default function DesignSystemPage() {
   return (
@@ -102,80 +105,139 @@ export default function DesignSystemPage() {
       </Section>
 
       <Section title="Inputs">
-        <div className="grid gap-4 md:grid-cols-3">
-          <Field label="아파트명">
-            <Input placeholder="아파트명을 입력하세요" />
-          </Field>
-          <Field label="계약년월">
-            <Input type="month" defaultValue="2026-05" />
-          </Field>
-          <Field label="지역">
-            <Select>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="선택하세요" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="11">서울특별시</SelectItem>
-                <SelectItem value="41">경기도</SelectItem>
-              </SelectContent>
-            </Select>
-          </Field>
+        <div className="grid gap-4 ">
+          <Card className="rounded-lg border-border bg-card shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-base font-semibold text-foreground">
+                Input
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Input placeholder="아파트명을 입력하세요" />
+            </CardContent>
+          </Card>
+          <Card className="rounded-lg border-border bg-card shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-base font-semibold text-foreground">
+                Combobox
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Combobox
+                options={regionOptions}
+                placeholder="지역을 선택하세요"
+                searchPlaceholder="지역명을 검색하세요"
+              />
+            </CardContent>
+          </Card>
+          <Card className="rounded-lg border-border bg-card shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-base font-semibold text-foreground">
+                Date Picker
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-3 md:grid-cols-3">
+              <Field label="year picker">
+                <DatePicker picker="year" placeholder="연도를 선택하세요" />
+              </Field>
+              <Field label="month picker">
+                <DatePicker picker="month" placeholder="월을 선택하세요" />
+              </Field>
+              <Field label="date picker">
+                <DatePicker picker="date" placeholder="날짜를 선택하세요" />
+              </Field>
+            </CardContent>
+          </Card>
         </div>
       </Section>
 
-      <Section title="Dashboard Components">
+      <Section title="Filter Components">
         <div className="grid gap-4">
-          <FilterBarShell />
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <KpiCard
-              label="총 거래 건수"
-              value="12,345"
-              unit="건"
-              change={{ tone: 'positive', value: '▲ 5.2%' }}
-            />
-            <KpiCard
-              label="평균 매매가"
-              value="850,000"
-              unit="만원"
-              change={{ tone: 'positive', value: '▲ 3.1%' }}
-            />
-            <KpiCard
-              label="평균 월세"
-              value="80"
-              unit="만원"
-              change={{ tone: 'negative', value: '▼ 1.3%' }}
-            />
-            <KpiCard label="최고 거래금액" value="2,450,000" unit="만원" />
-          </div>
+          <Card className="rounded-lg border-border bg-card shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-base font-semibold text-foreground">
+                Transaction Type Selector
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TransactionTypeSelector />
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-lg border-border bg-card shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-base font-semibold text-foreground">
+                Location Selector
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 md:grid-cols-3">
+                <LocationSelector />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-lg border-border bg-card shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-base font-semibold text-foreground">
+                Contract Month Picker
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ContractMonthPicker />
+            </CardContent>
+          </Card>
+        </div>
+      </Section>
+
+      <Section title="Card Components">
+        <div className="grid gap-4">
+          <CardPreview title="KPI Cards">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <KpiCard
+                label="총 거래 건수"
+                value="12,345"
+                unit="건"
+                change={{ tone: 'positive', value: '▲ 5.2%' }}
+              />
+              <KpiCard
+                label="평균 매매가"
+                value="850,000"
+                unit="만원"
+                change={{ tone: 'positive', value: '▲ 3.1%' }}
+              />
+              <KpiCard
+                label="평균 월세"
+                value="80"
+                unit="만원"
+                change={{ tone: 'negative', value: '▼ 1.3%' }}
+              />
+              <KpiCard label="최고 거래금액" value="2,450,000" unit="만원" />
+            </div>
+          </CardPreview>
+
+          <CardPreview title="Detail Info Cards">
+            <div className="grid gap-4 md:grid-cols-2">
+              <DetailInfoCard title="기본 거래 정보">
+                <InfoRow label="거래유형" value="매매" />
+                <InfoRow label="계약일" value="2026-05-30" />
+              </DetailInfoCard>
+              <DetailInfoCard title="아파트 정보">
+                <InfoRow label="아파트명" value="래미안 강남힐스" />
+                <InfoRow label="전용면적" value="84.97㎡" />
+              </DetailInfoCard>
+            </div>
+          </CardPreview>
+        </div>
+      </Section>
+
+      <Section title="Charts & Tables">
+        <div className="grid gap-4">
           <div className="grid gap-4 xl:grid-cols-3">
-            <ChartPlaceholder title="거래량 추이" />
-            <ChartPlaceholder title="거래유형 비중" variant="donut" />
             <ChartPlaceholder title="지역별 거래 TOP 5" variant="bar" />
+            <ChartPlaceholder title="거래유형 비중" variant="donut" />
           </div>
           <TablePlaceholder title="최근 거래 목록" />
-        </div>
-      </Section>
-
-      <Section title="Detail Components">
-        <div className="grid gap-4 md:grid-cols-3">
-          <DetailInfoCard title="기본 거래 정보">
-            <InfoRow label="거래유형" value="매매" />
-            <InfoRow label="계약일" value="2026-05-30" />
-          </DetailInfoCard>
-          <DetailInfoCard title="아파트 정보">
-            <InfoRow label="아파트명" value="래미안 강남힐스" />
-            <InfoRow label="전용면적" value="84.97㎡" />
-          </DetailInfoCard>
-          <DetailInfoCard title="Export Buttons">
-            <Button variant="outline">
-              <Download className="size-4" aria-hidden="true" />
-              CSV
-            </Button>
-            <Button variant="outline">
-              <FileSpreadsheet className="size-4" aria-hidden="true" />
-              Excel
-            </Button>
-          </DetailInfoCard>
         </div>
       </Section>
     </div>
@@ -213,6 +275,25 @@ function Field({
       </Label>
       {children}
     </div>
+  );
+}
+
+function CardPreview({
+  children,
+  title,
+}: {
+  children: React.ReactNode;
+  title: string;
+}) {
+  return (
+    <Card className="rounded-lg border-border bg-card shadow-sm">
+      <CardHeader>
+        <CardTitle className="text-base font-semibold text-foreground">
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
   );
 }
 
