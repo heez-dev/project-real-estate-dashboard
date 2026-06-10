@@ -10,7 +10,7 @@ export function MobileBottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 grid h-16 grid-cols-2 border-t border-border bg-card md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 grid h-16 min-w-[360px] grid-cols-2 border-t border-border bg-card md:hidden"
       aria-label="모바일 주요 메뉴"
     >
       {appNavItems.map((item) => {

@@ -11,7 +11,7 @@ type AppShellProps = {
 
 export function AppShell({ children }: AppShellProps) {
   return (
-    <div className="min-h-dvh bg-background text-foreground">
+    <div className="min-h-dvh min-w-[360px] bg-background text-foreground">
       <div className="flex min-h-dvh">
         <SidebarNav />
         <CompactRailNav />
