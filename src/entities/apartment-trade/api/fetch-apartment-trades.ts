@@ -37,3 +37,39 @@ export async function fetchApartmentTrades(
 
   return parseApartmentTradeResponse(xmlText, params);
 }
+
+export async function fetchAllApartmentTrades(
+  params: FetchApartmentTradesParams,
+): Promise<ApartmentTradeSearchResult> {
+  // 서버 초기 렌더링도 클라이언트 재조회와 같은 전체 페이지 기준으로 맞춘다.
+  // 전세/월세 분류와 법정동 TOP 계산은 응답 item 전체가 있어야 정확하게 산출된다.
+  const pageSize = 1000;
+  const firstPage = await fetchApartmentTrades({
+    ...params,
+    numOfRows: pageSize,
+    pageNo: 1,
+  });
+  const totalPages = Math.ceil(firstPage.totalCount / pageSize);
+
+  if (totalPages <= 1) {
+    return firstPage;
+  }
+
+  const remainingPages = await Promise.all(
+    Array.from({ length: totalPages - 1 }, (_, index) =>
+      fetchApartmentTrades({
+        ...params,
+        numOfRows: pageSize,
+        pageNo: index + 2,
+      }),
+    ),
+  );
+
+  return {
+    ...firstPage,
+    items: [
+      ...firstPage.items,
+      ...remainingPages.flatMap((result) => result.items),
+    ],
+  };
+}
