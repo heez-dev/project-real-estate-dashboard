@@ -6,26 +6,19 @@ import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
 import { cn } from '@/lib/utils';
 import { Field } from '@/src/shared/components/filter/Field';
 import { useLegalDongCodeQuery } from '@/src/features/transaction-search/api/use-legal-dong-code-query';
-
-export const ALL_LOCATION_VALUE = 'all';
-
-export type LocationSelectorValue = {
-  provinceCode: string;
-  districtCode: string;
-  townCode: string;
-};
+import {
+  ALL_LOCATION_VALUE,
+  createLocationGroupValue,
+  defaultLocationValue,
+  type LocationSelectorValue,
+  splitLocationGroupValue,
+} from '@/src/shared/model/location-selector-model';
 
 type LocationSelectorProps = {
   value?: LocationSelectorValue;
   defaultValue?: LocationSelectorValue;
   onValueChange?: (value: LocationSelectorValue) => void;
   className?: string;
-};
-
-const defaultLocationValue: LocationSelectorValue = {
-  districtCode: ALL_LOCATION_VALUE,
-  provinceCode: ALL_LOCATION_VALUE,
-  townCode: ALL_LOCATION_VALUE,
 };
 
 const allOption = {
@@ -47,25 +40,19 @@ export function LocationSelector({
   const { data, isLoading } = useLegalDongCodeQuery({ level: 'town' });
 
   const provinceOptions = React.useMemo(
-    () => [allOption, ...(data?.provinceOptions ?? [])],
+    () => data?.provinceOptions ?? [],
     [data?.provinceOptions],
   );
 
   const districtOptions = React.useMemo(() => {
-    if (!data || selectedValue.provinceCode === ALL_LOCATION_VALUE) {
-      return [allOption];
+    if (!data) {
+      return [];
     }
 
     const districtGroup = data.districtGroups.find(
       (group) => group.provinceCode === selectedValue.provinceCode,
     );
-    const districts =
-      districtGroup?.districts.map((district) => ({
-        ...district,
-        label: district.label.replace(`${districtGroup.provinceName} `, ''),
-      })) ?? [];
-
-    return [allOption, ...districts];
+    return districtGroup?.districts ?? [];
   }, [data, selectedValue.provinceCode]);
 
   const townOptions = React.useMemo(() => {
@@ -73,32 +60,67 @@ export function LocationSelector({
       return [allOption];
     }
 
-    const towns = data.items
-      .filter((item) => item.lawdCode === selectedValue.districtCode)
+    // 시군구가 중복 코드 그룹일 수 있으므로 선택된 모든 LAWD_CD에 속한 읍면동을 합쳐 노출한다.
+    const selectedDistrictCodes = splitLocationGroupValue(
+      selectedValue.districtCode,
+    );
+    const townGroups = new Map<string, ComboboxOption>();
+
+    data.items
+      .filter((item) => selectedDistrictCodes.includes(item.lawdCode))
       .map(
         (item): ComboboxOption => ({
-          label: item.name.split(' ').at(-1) ?? item.label,
+          label: item.label.split(' ').at(-1) ?? item.label,
           value: item.code,
           keywords: [item.name, item.label],
         }),
-      );
+      )
+      .forEach((option) => {
+        const existingOption = townGroups.get(option.label);
 
-    return [allOption, ...towns];
+        if (existingOption) {
+          existingOption.value = createLocationGroupValue([
+            ...splitLocationGroupValue(existingOption.value),
+            option.value,
+          ]);
+          existingOption.keywords = [
+            ...(existingOption.keywords ?? []),
+            ...(option.keywords ?? []),
+          ];
+        } else {
+          townGroups.set(option.label, option);
+        }
+      });
+
+    return [
+      allOption,
+      ...Array.from(townGroups.values()).sort((a, b) =>
+        a.value.localeCompare(b.value),
+      ),
+    ];
   }, [data, selectedValue.districtCode]);
 
-  const updateValue = (nextValue: LocationSelectorValue) => {
-    if (!isControlled) {
-      setInternalValue(nextValue);
-    }
+  const updateValue = React.useCallback(
+    (nextValue: LocationSelectorValue) => {
+      if (!isControlled) {
+        setInternalValue(nextValue);
+      }
 
-    onValueChange?.(nextValue);
-  };
+      onValueChange?.(nextValue);
+    },
+    [isControlled, onValueChange],
+  );
 
   const handleProvinceChange = (provinceCode: string) => {
+    const districtCode =
+      data?.districtGroups.find((group) => group.provinceCode === provinceCode)
+        ?.districts[0]?.value ?? ALL_LOCATION_VALUE;
+
     updateValue({
-      districtCode: ALL_LOCATION_VALUE,
+      districtCode,
       provinceCode,
       townCode: ALL_LOCATION_VALUE,
+      townNames: [],
     });
   };
 
@@ -107,13 +129,22 @@ export function LocationSelector({
       ...selectedValue,
       districtCode,
       townCode: ALL_LOCATION_VALUE,
+      townNames: [],
     });
   };
 
   const handleTownChange = (townCode: string) => {
+    const selectedTownNames =
+      townCode === ALL_LOCATION_VALUE
+        ? []
+        : townOptions
+            .filter((option) => option.value === townCode)
+            .map((option) => option.label);
+
     updateValue({
       ...selectedValue,
       townCode,
+      townNames: selectedTownNames,
     });
   };
 
@@ -122,6 +153,7 @@ export function LocationSelector({
       <Field label="시/도">
         <Combobox
           disabled={isLoading}
+          isLoading={isLoading}
           options={provinceOptions}
           value={selectedValue.provinceCode}
           onValueChange={handleProvinceChange}
@@ -131,27 +163,29 @@ export function LocationSelector({
         />
       </Field>
 
-      <Field label="시군구">
+      <Field label="시/군/구">
         <Combobox
           disabled={isLoading}
+          isLoading={isLoading}
           options={districtOptions}
           value={selectedValue.districtCode}
           onValueChange={handleDistrictChange}
-          placeholder="시군구 선택"
-          searchPlaceholder="시군구를 검색하세요"
-          emptyMessage="시군구가 없습니다."
+          placeholder="시/군/구 선택"
+          searchPlaceholder="시/군/구를 검색하세요"
+          emptyMessage="시/군/구가 없습니다."
         />
       </Field>
 
-      <Field label="읍면동">
+      <Field label="읍/면/동">
         <Combobox
           disabled={isLoading}
+          isLoading={isLoading}
           options={townOptions}
           value={selectedValue.townCode}
           onValueChange={handleTownChange}
-          placeholder="읍면동 선택"
-          searchPlaceholder="읍면동을 검색하세요"
-          emptyMessage="읍면동이 없습니다."
+          placeholder="읍/면/동 선택"
+          searchPlaceholder="읍/면/동을 검색하세요"
+          emptyMessage="읍/면/동이 없습니다."
         />
       </Field>
     </div>
