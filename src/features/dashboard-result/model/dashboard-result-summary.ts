@@ -41,8 +41,13 @@ export function createDashboardResultSummary({
   const saleTrades = allTrades.filter((trade) => trade.tradeType === 'sale');
   const rentTrades = allTrades.filter((trade) => trade.tradeType === 'rent');
   const jeonseTrades = rentTrades.filter((trade) => isJeonseTrade(trade));
-  const monthlyRentTrades = rentTrades.filter((trade) => isMonthlyRentTrade(trade));
-  const targetTrades = filterTradesByTransactionType(allTrades, transactionType);
+  const monthlyRentTrades = rentTrades.filter((trade) =>
+    isMonthlyRentTrade(trade),
+  );
+  const targetTrades = filterTradesByTransactionType(
+    allTrades,
+    transactionType,
+  );
 
   return {
     averageDealAmount: averageAmount(
@@ -59,7 +64,7 @@ export function createDashboardResultSummary({
       targetTrades.map((trade) => trade.depositAmount),
     ),
     jeonseCount: jeonseTrades.length,
-    latestTrades: sortByLatestDealDate(targetTrades).slice(0, 6),
+    latestTrades: sortByLatestDealDate(targetTrades).slice(0, 10),
     monthlyRentCount: monthlyRentTrades.length,
     saleCount: saleTrades.length,
     targetTotalCount: targetTrades.length,
@@ -94,7 +99,9 @@ function filterTradesByTransactionType(
   }
 
   if (transactionType === 'jeonse') {
-    return trades.filter((trade) => trade.tradeType === 'rent' && isJeonseTrade(trade));
+    return trades.filter(
+      (trade) => trade.tradeType === 'rent' && isJeonseTrade(trade),
+    );
   }
 
   if (transactionType === 'monthly-rent') {
@@ -149,12 +156,15 @@ function getDealDateKey(trade: ApartmentTrade) {
 }
 
 function createTopLegalDongs(trades: ApartmentTrade[]) {
-  const countByLegalDong = trades.reduce<Record<string, number>>((acc, trade) => {
-    const key = trade.legalDong || '미상';
-    acc[key] = (acc[key] ?? 0) + 1;
+  const countByLegalDong = trades.reduce<Record<string, number>>(
+    (acc, trade) => {
+      const key = trade.legalDong || '미상';
+      acc[key] = (acc[key] ?? 0) + 1;
 
-    return acc;
-  }, {});
+      return acc;
+    },
+    {},
+  );
 
   return Object.entries(countByLegalDong)
     .map(([name, count]) => ({ count, name }))
