@@ -36,6 +36,7 @@ import {
   formatDealDate,
   formatTradeAmount,
   getTradeTypeLabel,
+  transactionTypeLabel,
 } from '@/src/features/dashboard-result/model/dashboard-result-format';
 import type { ApartmentTrade } from '@/src/entities/apartment-trade/model/apartment-trade';
 import { Badge } from '@/components/ui/badge';
@@ -147,22 +148,26 @@ export function TransactionsSearchSection({
   const trades = summary.targetTrades;
   const columnDefs = React.useMemo<ColDef<ApartmentTrade>[]>(
     () => [
-      {
-        field: 'tradeType',
-        headerName: '거래유형',
-        width: 100,
-        sortable: true,
-        cellRenderer: (
-          props: CustomCellRendererProps<
-            ApartmentTrade,
-            ApartmentTrade['tradeType']
-          >,
-        ) => (
-          <Badge variant="ghost">
-            {props.data ? getTradeTypeLabel(props.data) : '-'}
-          </Badge>
-        ),
-      },
+      ...(submittedFilter.transactionType === 'all'
+        ? [
+            {
+              field: 'tradeType',
+              headerName: '거래유형',
+              width: 100,
+              sortable: true,
+              cellRenderer: (
+                props: CustomCellRendererProps<
+                  ApartmentTrade,
+                  ApartmentTrade['tradeType']
+                >,
+              ) => (
+                <Badge variant="ghost">
+                  {props.data ? getTradeTypeLabel(props.data) : '-'}
+                </Badge>
+              ),
+            } satisfies ColDef<ApartmentTrade>,
+          ]
+        : []),
       {
         field: 'apartmentName',
         headerName: '아파트명',
@@ -202,7 +207,7 @@ export function TransactionsSearchSection({
         valueGetter: ({ data }) => (data ? formatDealDate(data) : '-'),
       },
     ],
-    [],
+    [submittedFilter.transactionType],
   );
 
   if (hasError) {
@@ -265,7 +270,8 @@ export function TransactionsSearchSection({
       {query.data ? (
         <div>
           <div className="py-2 text-sm text-right text-muted-foreground">
-            검색 결과 {trades.length.toLocaleString()}건
+            {transactionTypeLabel[submittedFilter.transactionType]} 검색 결과{' '}
+            {trades.length.toLocaleString()}건
           </div>
           <div className="ag-theme-quartz h-[min(65vh,36rem)] w-full min-w-0">
             <AgGridReact<ApartmentTrade>
