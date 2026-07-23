@@ -47,6 +47,7 @@ import {
 } from '@/src/features/dashboard-result/model/dashboard-result-format';
 import type { ApartmentTrade } from '@/src/entities/apartment-trade/model/apartment-trade';
 import { Badge } from '@/components/ui/badge';
+import { TransactionDetailDrawer } from '@/src/features/transactions-detail/ui/TransactionDetailDrawer';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -83,6 +84,8 @@ export function TransactionsSearchSection({
     React.useState<TransactionsFilterValue>(defaultFilterValue);
   const [searchRequestId, setSearchRequestId] = React.useState(0);
   const [validationMessage, setValidationMessage] = React.useState<string>();
+  const [selectedTrade, setSelectedTrade] =
+    React.useState<ApartmentTrade | null>(null);
   const initialResult = React.useMemo(() => {
     if (
       !initialResults ||
@@ -346,25 +349,26 @@ export function TransactionsSearchSection({
               defaultColDef={{ resizable: true, sortable: true }}
               suppressCellFocus={true}
               suppressScrollOnNewData
+              rowClass="cursor-pointer"
+              onRowClicked={({ data }) => {
+                if (data) {
+                  setSelectedTrade(data);
+                }
+              }}
               theme="legacy"
               overlayNoRowsTemplate="조회 결과가 없습니다."
             />
           </div>
         </div>
       ) : null}
+      <TransactionDetailDrawer
+        trade={selectedTrade}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedTrade(null);
+          }
+        }}
+      />
     </section>
   );
-}
-
-function getAmountPerSquareMeter(trade?: ApartmentTrade) {
-  if (!trade?.exclusiveArea || trade.exclusiveArea <= 0) {
-    return null;
-  }
-
-  const amount =
-    trade.tradeType === 'sale' || trade.tradeType === 'sale-detail'
-      ? trade.dealAmount
-      : trade.depositAmount;
-
-  return amount === null ? null : amount / trade.exclusiveArea;
 }
