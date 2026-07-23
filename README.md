@@ -30,15 +30,15 @@
 
 ## 기술 스택
 
-| 구분 | 기술 |
-| --- | --- |
-| 프레임워크 | Next.js 16(App Router), React 19, TypeScript |
-| 스타일/UI | Tailwind CSS 4, shadcn/ui, Radix UI, Lucide React |
-| 데이터 그리드 | AG Grid Community |
-| 서버 상태 | TanStack Query |
-| 클라이언트 상태 | Zustand |
-| 검증/파싱 | Zod, fast-xml-parser |
-| 패키지 관리 | pnpm |
+| 구분            | 기술                                              |
+| --------------- | ------------------------------------------------- |
+| 프레임워크      | Next.js 16(App Router), React 19, TypeScript      |
+| 스타일/UI       | Tailwind CSS 4, shadcn/ui, Radix UI, Lucide React |
+| 데이터 그리드   | AG Grid Community                                 |
+| 서버 상태       | TanStack Query                                    |
+| 클라이언트 상태 | Zustand                                           |
+| 검증/파싱       | Zod, fast-xml-parser                              |
+| 패키지 관리     | pnpm                                              |
 
 ## 시작하기
 
@@ -88,11 +88,11 @@ pnpm start
 
 ## 화면 경로
 
-| 경로 | 설명 |
-| --- | --- |
-| `/` | `/dashboard`로 이동 |
-| `/dashboard` | 실거래 요약 대시보드 |
-| `/transactions` | 상세 조건을 지원하는 전체 거래 조회 |
+| 경로             | 설명                                    |
+| ---------------- | --------------------------------------- |
+| `/`              | `/dashboard`로 이동                     |
+| `/dashboard`     | 실거래 요약 대시보드                    |
+| `/transactions`  | 상세 조건을 지원하는 전체 거래 조회     |
 | `/design-system` | 프로젝트 UI 컴포넌트와 디자인 토큰 확인 |
 
 ## 내부 API
@@ -101,20 +101,20 @@ pnpm start
 
 ### `GET /api/apartment-trades`
 
-| 파라미터 | 형식 | 설명 |
-| --- | --- | --- |
-| `tradeType` | `sale`, `sale-detail`, `rent` | 조회할 공공 API 유형 |
-| `lawdCode` | 숫자 5자리 | 시·군·구 법정동 코드 |
-| `dealYearMonth` | `YYYYMM` | 계약 연월 |
-| `pageNo` | 1 이상의 정수 | 페이지 번호, 기본값 `1` |
-| `numOfRows` | 1~1000 | 페이지당 건수, 기본값 `100` |
+| 파라미터        | 형식                          | 설명                        |
+| --------------- | ----------------------------- | --------------------------- |
+| `tradeType`     | `sale`, `sale-detail`, `rent` | 조회할 공공 API 유형        |
+| `lawdCode`      | 숫자 5자리                    | 시·군·구 법정동 코드        |
+| `dealYearMonth` | `YYYYMM`                      | 계약 연월                   |
+| `pageNo`        | 1 이상의 정수                 | 페이지 번호, 기본값 `1`     |
+| `numOfRows`     | 1~1000                        | 페이지당 건수, 기본값 `100` |
 
 ### `GET /api/legal-dong-codes`
 
-| 파라미터 | 형식 | 설명 |
-| --- | --- | --- |
-| `level` | `province`, `district`, `town` | 반환할 지역 단계, 기본값 `district` |
-| `includeInactive` | boolean | 폐지된 법정동 포함 여부, 기본값 `false` |
+| 파라미터          | 형식                           | 설명                                    |
+| ----------------- | ------------------------------ | --------------------------------------- |
+| `level`           | `province`, `district`, `town` | 반환할 지역 단계, 기본값 `district`     |
+| `includeInactive` | boolean                        | 폐지된 법정동 포함 여부, 기본값 `false` |
 
 유효하지 않은 요청은 `400`, 외부 API 호출 실패는 `500` 응답을 반환합니다.
 
@@ -153,17 +153,8 @@ pnpm start
 
 ## 데이터 출처
 
-- [공공데이터포털](https://www.data.go.kr/) 국토교통부 아파트 매매 실거래가 자료
-- [공공데이터포털](https://www.data.go.kr/) 국토교통부 아파트 전월세 자료
-- [공공데이터포털](https://www.data.go.kr/) 법정동 코드 조회 데이터
+- [공공데이터포털 국토교통부 아파트 매매 실거래가 자료](https://www.data.go.kr/data/15126469/openapi.do)
+- [공공데이터포털 국토교통부 아파트 전월세 자료](https://www.data.go.kr/data/15126474/openapi.do)
+- [공공데이터포털 국토교통부 법정동 코드 데이터](https://www.data.go.kr/data/15123287/fileData.do)
 
 공공 API의 응답 여부와 데이터 갱신 시점은 제공 기관의 상태에 따라 달라질 수 있습니다.
-
-## 현재 범위와 향후 개선
-
-현재 대시보드 요약, AG Grid 거래 목록, 상세 조건 검색, 거래 상세 드로어까지 구현되어 있습니다. 다음 기능은 아직 포함되어 있지 않습니다.
-
-- 거래량 추이 및 지역 분포 차트
-- CSV·Excel 내보내기
-- 독립된 거래 상세 URL 화면
-- 자동화 테스트
