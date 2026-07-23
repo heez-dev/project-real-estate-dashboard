@@ -1,8 +1,11 @@
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import type { ApartmentTradeSearchResult } from '@/src/entities/apartment-trade/model/apartment-trade';
+import { createTransactionsHref } from '@/src/features/dashboard-filter/model/dashboard-filter-query';
 import {
   formatAmount,
   formatDealDate,
@@ -20,6 +23,7 @@ import {
   type DashboardResultSummary,
 } from '@/src/features/dashboard-result/model/dashboard-result-summary';
 import { KpiCard } from '@/src/shared/components/card/KpiCard';
+import type { DashboardFilterValue } from '@/src/features/dashboard-filter/model/dashboard-filter-schema';
 import type { TransactionType } from '@/src/shared/model/transaction-type-model';
 
 type DashboardTradeResultsProps = {
@@ -28,6 +32,7 @@ type DashboardTradeResultsProps = {
   isPreviousMonthLoading: boolean;
   previousMonthResults: ApartmentTradeSearchResult[];
   results: ApartmentTradeSearchResult[];
+  submittedFilter: DashboardFilterValue;
   townNames?: string[];
   transactionType: TransactionType;
 };
@@ -38,6 +43,7 @@ export function DashboardTradeResults({
   isPreviousMonthLoading,
   previousMonthResults,
   results,
+  submittedFilter,
   townNames,
   transactionType,
 }: DashboardTradeResultsProps) {
@@ -120,7 +126,7 @@ export function DashboardTradeResults({
         {shouldShowTopLegalDongs ? (
           <TopLegalDongCard summary={summary} />
         ) : null}
-        <RecentTradeTable summary={summary} />
+        <RecentTradeTable summary={summary} submittedFilter={submittedFilter} />
       </div>
     </section>
   );
@@ -324,12 +330,21 @@ function TopLegalDongCard({ summary }: { summary: DashboardResultSummary }) {
   );
 }
 
-function RecentTradeTable({ summary }: { summary: DashboardResultSummary }) {
+function RecentTradeTable({
+  summary,
+  submittedFilter,
+}: {
+  summary: DashboardResultSummary;
+  submittedFilter: DashboardFilterValue;
+}) {
   return (
     <Card className="rounded-lg border-border bg-card shadow-sm">
       <CardHeader>
-        <CardTitle className="text-base font-semibold text-foreground">
+        <CardTitle className="text-base font-semibold text-foreground flex items-center justify-between">
           최근 거래 목록
+          <Button asChild variant="link" size="sm" className="text-xs">
+            <Link href={createTransactionsHref(submittedFilter)}>더보기</Link>
+          </Button>
         </CardTitle>
       </CardHeader>
       <CardContent>

@@ -2,6 +2,7 @@ import type {
   ApartmentTradeSearchParams,
   ApartmentTradeSearchResult,
 } from '@/src/entities/apartment-trade/model/apartment-trade';
+import type { TransactionType } from '@/src/shared/model/transaction-type-model';
 
 export type RequestApartmentTradesParams = ApartmentTradeSearchParams & {
   numOfRows?: number;
@@ -32,6 +33,72 @@ export async function requestApartmentTrades(
   }
 
   return (await response.json()) as ApartmentTradeSearchResult;
+}
+
+export async function requestAllTransactionTrades(
+  params: ApartmentTradeSearchParams[],
+  transactionType: TransactionType,
+) {
+  const results = await Promise.all(
+    params.map((param) => requestAllApartmentTrades(param)),
+  );
+  const filteredItems = filterTransactionTrades(
+    results.flatMap((result) => result.items),
+    transactionType,
+  );
+
+  return {
+    items: sortTradesByLatest(filteredItems),
+    pageNo: 1,
+    numOfRows: filteredItems.length,
+    totalCount: filteredItems.length,
+  };
+}
+
+export function filterTransactionTrades(
+  items: ApartmentTradeSearchResult['items'],
+  transactionType: TransactionType,
+) {
+  return items.filter((item) => {
+    if (transactionType === 'all') {
+      return true;
+    }
+
+    if (transactionType === 'sale') {
+      return item.tradeType === 'sale';
+    }
+
+    return transactionType === 'jeonse'
+      ? item.tradeType === 'rent' && (item.monthlyRent ?? 0) === 0
+      : item.tradeType === 'rent' && (item.monthlyRent ?? 0) > 0;
+  });
+}
+
+export function sortTradesByLatest<
+  T extends {
+    dealDay: number | null;
+    dealMonth: number | null;
+    dealYear: number | null;
+  },
+>(items: T[]) {
+  return [...items].sort(
+    (firstTrade, secondTrade) =>
+      getDealDateKey(secondTrade) - getDealDateKey(firstTrade),
+  );
+}
+
+function getDealDateKey(trade: {
+  dealDay: number | null;
+  dealMonth: number | null;
+  dealYear: number | null;
+}) {
+  return Number(
+    [
+      trade.dealYear ?? 0,
+      String(trade.dealMonth ?? 0).padStart(2, '0'),
+      String(trade.dealDay ?? 0).padStart(2, '0'),
+    ].join(''),
+  );
 }
 
 export async function requestAllApartmentTrades(

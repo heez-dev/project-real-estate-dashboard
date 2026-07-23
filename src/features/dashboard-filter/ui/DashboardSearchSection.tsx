@@ -199,6 +199,7 @@ export function DashboardSearchSection({
         isPreviousMonthLoading={isPreviousMonthLoading}
         previousMonthResults={previousMonthResults}
         results={results}
+        submittedFilter={submittedFilter}
         townNames={submittedFilter.location.townNames}
         transactionType={submittedFilter.transactionType}
       />
