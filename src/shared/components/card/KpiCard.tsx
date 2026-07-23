@@ -1,10 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 type KpiCardProps = {
   change?: {
     tone: 'negative' | 'positive' | 'neutral';
     value: string;
   };
+  className?: string;
   label: string;
   unit?: string;
   value: string;
@@ -16,9 +18,17 @@ const changeToneClassName = {
   positive: 'text-emerald-600 dark:text-emerald-400',
 } as const;
 
-export function KpiCard({ change, label, unit, value }: KpiCardProps) {
+export function KpiCard({
+  change,
+  className,
+  label,
+  unit,
+  value,
+}: KpiCardProps) {
   return (
-    <Card className="rounded-lg border-border bg-card shadow-sm">
+    <Card
+      className={cn('rounded-lg border-border bg-card shadow-sm', className)}
+    >
       <CardHeader className="flex-row items-start justify-between gap-3">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {label}

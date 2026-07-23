@@ -91,7 +91,7 @@ export function DashboardTradeResults({
 
   return (
     <section className="grid gap-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex gap-3 items-center justify-between">
         <h2 className="text-lg font-semibold leading-7 text-foreground">
           {transactionTypeLabel[transactionType]} 거래 요약
         </h2>
@@ -117,7 +117,9 @@ export function DashboardTradeResults({
           shouldShowTopLegalDongs && 'lg:grid-cols-[1fr_1.4fr]',
         )}
       >
-        {shouldShowTopLegalDongs ? <TopLegalDongCard summary={summary} /> : null}
+        {shouldShowTopLegalDongs ? (
+          <TopLegalDongCard summary={summary} />
+        ) : null}
         <RecentTradeTable summary={summary} />
       </div>
     </section>
@@ -135,13 +137,14 @@ function ResultKpiGrid({
 }) {
   if (summary.transactionType === 'sale') {
     return (
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
         <KpiCard
           change={formatMonthlyCountChange({
             currentValue: summary.targetTotalCount,
             isLoading: isPreviousMonthLoading,
             previousValue: previousMonthSummary?.targetTotalCount ?? null,
           })}
+          className="col-span-2"
           label="매매 거래"
           value={summary.targetTotalCount.toLocaleString()}
           unit="건"
@@ -170,13 +173,14 @@ function ResultKpiGrid({
 
   if (summary.transactionType === 'jeonse') {
     return (
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
         <KpiCard
           change={formatMonthlyCountChange({
             currentValue: summary.targetTotalCount,
             isLoading: isPreviousMonthLoading,
             previousValue: previousMonthSummary?.targetTotalCount ?? null,
           })}
+          className="col-span-2"
           label="전세 거래"
           value={summary.targetTotalCount.toLocaleString()}
           unit="건"
@@ -205,13 +209,14 @@ function ResultKpiGrid({
 
   if (summary.transactionType === 'monthly-rent') {
     return (
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
         <KpiCard
           change={formatMonthlyCountChange({
             currentValue: summary.targetTotalCount,
             isLoading: isPreviousMonthLoading,
             previousValue: previousMonthSummary?.targetTotalCount ?? null,
           })}
+          className="col-span-2"
           label="월세 거래"
           value={summary.targetTotalCount.toLocaleString()}
           unit="건"
@@ -239,7 +244,7 @@ function ResultKpiGrid({
   }
 
   return (
-    <div className="grid gap-3 md:grid-cols-4">
+    <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
       <KpiCard
         change={formatMonthlyCountChange({
           currentValue: summary.targetTrades.length,
