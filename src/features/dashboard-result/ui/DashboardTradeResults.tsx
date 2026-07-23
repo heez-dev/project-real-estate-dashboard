@@ -1,10 +1,23 @@
+'use client';
+
+import {
+  AllCommunityModule,
+  ModuleRegistry,
+  type ColDef,
+} from 'ag-grid-community';
+import { AgGridReact, type CustomCellRendererProps } from 'ag-grid-react';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-quartz.css';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import type { ApartmentTradeSearchResult } from '@/src/entities/apartment-trade/model/apartment-trade';
+import type {
+  ApartmentTrade,
+  ApartmentTradeSearchResult,
+} from '@/src/entities/apartment-trade/model/apartment-trade';
 import { createTransactionsHref } from '@/src/features/dashboard-filter/model/dashboard-filter-query';
 import {
   formatAmount,
@@ -25,6 +38,8 @@ import {
 import { KpiCard } from '@/src/shared/components/card/KpiCard';
 import type { DashboardFilterValue } from '@/src/features/dashboard-filter/model/dashboard-filter-schema';
 import type { TransactionType } from '@/src/shared/model/transaction-type-model';
+
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 type DashboardTradeResultsProps = {
   hasError: boolean;
@@ -143,14 +158,14 @@ function ResultKpiGrid({
 }) {
   if (summary.transactionType === 'sale') {
     return (
-      <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-3">
         <KpiCard
           change={formatMonthlyCountChange({
             currentValue: summary.targetTotalCount,
             isLoading: isPreviousMonthLoading,
             previousValue: previousMonthSummary?.targetTotalCount ?? null,
           })}
-          className="col-span-2"
+          className="col-span-2 md:col-span-1"
           label="매매 거래"
           value={summary.targetTotalCount.toLocaleString()}
           unit="건"
@@ -179,14 +194,14 @@ function ResultKpiGrid({
 
   if (summary.transactionType === 'jeonse') {
     return (
-      <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-3">
         <KpiCard
           change={formatMonthlyCountChange({
             currentValue: summary.targetTotalCount,
             isLoading: isPreviousMonthLoading,
             previousValue: previousMonthSummary?.targetTotalCount ?? null,
           })}
-          className="col-span-2"
+          className="col-span-2 md:col-span-1"
           label="전세 거래"
           value={summary.targetTotalCount.toLocaleString()}
           unit="건"
@@ -215,14 +230,14 @@ function ResultKpiGrid({
 
   if (summary.transactionType === 'monthly-rent') {
     return (
-      <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-3">
         <KpiCard
           change={formatMonthlyCountChange({
             currentValue: summary.targetTotalCount,
             isLoading: isPreviousMonthLoading,
             previousValue: previousMonthSummary?.targetTotalCount ?? null,
           })}
-          className="col-span-2"
+          className="col-span-2 md:col-span-1"
           label="월세 거래"
           value={summary.targetTotalCount.toLocaleString()}
           unit="건"
@@ -348,43 +363,68 @@ function RecentTradeTable({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-180 text-left text-sm">
-            <thead className="border-b border-border text-xs text-muted-foreground">
-              <tr>
-                <th className="py-2 pr-3 font-medium">거래유형</th>
-                <th className="py-2 pr-3 font-medium">아파트명</th>
-                <th className="py-2 pr-3 font-medium">법정동</th>
-                <th className="py-2 pr-3 font-medium">금액</th>
-                <th className="py-2 pr-3 font-medium">전용면적</th>
-                <th className="py-2 font-medium">계약일</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border text-foreground">
-              {summary.latestTrades.map((trade) => (
-                <tr key={trade.id}>
-                  <td className="py-3 pr-3">
-                    <Badge variant="ghost">{getTradeTypeLabel(trade)}</Badge>
-                  </td>
-                  <td className="py-3 pr-3 font-medium">
-                    {trade.apartmentName || '-'}
-                  </td>
-                  <td className="py-3 pr-3 text-muted-foreground">
-                    {trade.legalDong || '-'}
-                  </td>
-                  <td className="py-3 pr-3">{formatTradeAmount(trade)}</td>
-                  <td className="py-3 pr-3">
-                    {formatExclusiveArea(trade.exclusiveArea)}
-                  </td>
-                  <td className="py-3 text-muted-foreground">
-                    {formatDealDate(trade)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="ag-theme-quartz w-full min-w-0">
+          <AgGridReact<ApartmentTrade>
+            columnDefs={recentTradeColumnDefs}
+            rowData={summary.latestTrades}
+            getRowId={({ data }) => data.id}
+            defaultColDef={{ resizable: true, sortable: true }}
+            domLayout="autoHeight"
+            suppressCellFocus
+            suppressScrollOnNewData
+            theme="legacy"
+            overlayNoRowsTemplate="최근 거래 내역이 없습니다."
+          />
         </div>
       </CardContent>
     </Card>
   );
 }
+
+const recentTradeColumnDefs: ColDef<ApartmentTrade>[] = [
+  {
+    field: 'tradeType',
+    headerName: '거래유형',
+    width: 100,
+    cellRenderer: (
+      props: CustomCellRendererProps<
+        ApartmentTrade,
+        ApartmentTrade['tradeType']
+      >,
+    ) => (
+      <Badge variant="ghost">
+        {props.data ? getTradeTypeLabel(props.data) : '-'}
+      </Badge>
+    ),
+  },
+  {
+    field: 'apartmentName',
+    headerName: '아파트명',
+    minWidth: 180,
+    flex: 1,
+  },
+  {
+    field: 'legalDong',
+    headerName: '법정동',
+    minWidth: 100,
+    flex: 1,
+  },
+  {
+    headerName: '금액',
+    minWidth: 140,
+    flex: 1,
+    valueGetter: ({ data }) => (data ? formatTradeAmount(data) : '-'),
+  },
+  {
+    field: 'exclusiveArea',
+    headerName: '전용면적',
+    width: 120,
+    valueFormatter: ({ value }) => formatExclusiveArea(value),
+  },
+  {
+    headerName: '계약일',
+    width: 120,
+    sort: 'desc',
+    valueGetter: ({ data }) => (data ? formatDealDate(data) : '-'),
+  },
+];
