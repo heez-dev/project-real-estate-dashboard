@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import {
   AllCommunityModule,
   ModuleRegistry,
@@ -38,6 +39,7 @@ import {
 import { KpiCard } from '@/src/shared/components/card/KpiCard';
 import type { DashboardFilterValue } from '@/src/features/dashboard-filter/model/dashboard-filter-schema';
 import type { TransactionType } from '@/src/shared/model/transaction-type-model';
+import { TransactionDetailDrawer } from '@/src/features/transactions-detail/ui/TransactionDetailDrawer';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -352,32 +354,51 @@ function RecentTradeTable({
   summary: DashboardResultSummary;
   submittedFilter: DashboardFilterValue;
 }) {
+  const [selectedTrade, setSelectedTrade] =
+    React.useState<ApartmentTrade | null>(null);
+
   return (
-    <Card className="rounded-lg border-border bg-card shadow-sm">
-      <CardHeader>
-        <CardTitle className="text-base font-semibold text-foreground flex items-center justify-between">
-          최근 거래 목록
-          <Button asChild variant="link" size="sm" className="text-xs">
-            <Link href={createTransactionsHref(submittedFilter)}>더보기</Link>
-          </Button>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="ag-theme-quartz w-full min-w-0">
-          <AgGridReact<ApartmentTrade>
-            columnDefs={recentTradeColumnDefs}
-            rowData={summary.latestTrades}
-            getRowId={({ data }) => data.id}
-            defaultColDef={{ resizable: true, sortable: true }}
-            domLayout="autoHeight"
-            suppressCellFocus
-            suppressScrollOnNewData
-            theme="legacy"
-            overlayNoRowsTemplate="최근 거래 내역이 없습니다."
-          />
-        </div>
-      </CardContent>
-    </Card>
+    <>
+      <Card className="rounded-lg border-border bg-card shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-base font-semibold text-foreground flex items-center justify-between">
+            최근 거래 목록
+            <Button asChild variant="link" size="sm" className="text-xs">
+              <Link href={createTransactionsHref(submittedFilter)}>더보기</Link>
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="ag-theme-quartz w-full min-w-0">
+            <AgGridReact<ApartmentTrade>
+              columnDefs={recentTradeColumnDefs}
+              rowData={summary.latestTrades}
+              getRowId={({ data }) => data.id}
+              defaultColDef={{ resizable: true, sortable: true }}
+              domLayout="autoHeight"
+              suppressCellFocus
+              suppressScrollOnNewData
+              rowClass="cursor-pointer"
+              onRowClicked={({ data }) => {
+                if (data) {
+                  setSelectedTrade(data);
+                }
+              }}
+              theme="legacy"
+              overlayNoRowsTemplate="최근 거래 내역이 없습니다."
+            />
+          </div>
+        </CardContent>
+      </Card>
+      <TransactionDetailDrawer
+        trade={selectedTrade}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedTrade(null);
+          }
+        }}
+      />
+    </>
   );
 }
 
