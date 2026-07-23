@@ -228,6 +228,7 @@ export function TransactionsSearchSection({
       {
         field: 'apartmentName',
         headerName: '아파트명',
+        flex: 1,
         width: 220,
         minWidth: 220,
         sortable: true,
