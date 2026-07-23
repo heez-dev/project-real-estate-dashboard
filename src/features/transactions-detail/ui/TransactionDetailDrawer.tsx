@@ -204,7 +204,7 @@ function DetailItem({
   return (
     <div className={className}>
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="mt-1 break-words text-sm font-medium text-foreground">
+      <dd className="mt-1 wrap-break-word text-sm font-medium text-foreground">
         {value}
       </dd>
     </div>
