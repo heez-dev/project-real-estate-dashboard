@@ -89,6 +89,23 @@ body {
   font-family: var(--font-sans);
 }
 
+.ag-theme-quartz.app-data-grid,
+.ag-theme-quartz.app-data-grid .ag-theme-quartz {
+  color-scheme: inherit;
+  --ag-active-color: var(--primary);
+  --ag-background-color: var(--card);
+  --ag-foreground-color: var(--card-foreground);
+  --ag-border-color: var(--border);
+  --ag-secondary-border-color: var(--border);
+  --ag-header-background-color: var(--muted);
+  --ag-header-foreground-color: var(--foreground);
+  --ag-row-hover-color: var(--accent);
+  --ag-selected-row-background-color: var(--accent);
+  --ag-tooltip-background-color: var(--popover);
+  --ag-tooltip-text-color: var(--popover-foreground);
+  --ag-font-family: var(--font-sans);
+}
+
 .dark {
   color-scheme: dark;
   --background: #020617;

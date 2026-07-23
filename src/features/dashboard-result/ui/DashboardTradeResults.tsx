@@ -369,7 +369,7 @@ function RecentTradeTable({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="ag-theme-quartz w-full min-w-0">
+          <div className="ag-theme-quartz app-data-grid w-full min-w-0">
             <AgGridReact<ApartmentTrade>
               columnDefs={recentTradeColumnDefs}
               rowData={summary.latestTrades}

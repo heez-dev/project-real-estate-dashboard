@@ -341,7 +341,7 @@ export function TransactionsSearchSection({
             {transactionTypeLabel[submittedFilter.transactionType]} 검색 결과{' '}
             {trades.length.toLocaleString()}건
           </div>
-          <div className="ag-theme-quartz h-[min(65vh,36rem)] w-full min-w-0">
+          <div className="ag-theme-quartz app-data-grid h-[min(65vh,36rem)] w-full min-w-0">
             <AgGridReact<ApartmentTrade>
               columnDefs={columnDefs}
               rowData={trades}
