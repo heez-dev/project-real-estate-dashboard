@@ -26,6 +26,13 @@ import { parseDashboardFilter } from '@/src/features/dashboard-filter/model/dash
 import { getDefaultDashboardFilterValue } from '@/src/features/dashboard-filter/model/dashboard-filter-defaults';
 import { createDashboardResultSummary } from '@/src/features/dashboard-result/model/dashboard-result-summary';
 import type { TransactionsFilterValue } from '@/src/features/transactions-filter/model/transactions-filter-schema';
+import {
+  emptyAdvancedTransactionsFilter,
+  filterTradesByAdvancedConditions,
+  validateAdvancedTransactionFilters,
+  type AdvancedTransactionsFilterValue,
+} from '@/src/features/transactions-filter/model/transactions-filter-schema';
+import { AdvancedTransactionsFilter } from '@/src/features/transactions-filter/ui/AdvancedTransactionsFilter';
 import { ContractMonthPicker } from '@/src/shared/components/filter/ContractMonthPicker';
 import { LocationSelector } from '@/src/shared/components/filter/LocationSelector';
 import { TransactionTypeSelector } from '@/src/shared/components/filter/TransactionTypeSelector';
@@ -65,6 +72,10 @@ export function TransactionsSearchSection({
   const [contractMonth, setContractMonth] = React.useState<string | undefined>(
     defaultFilterValue.contractMonth,
   );
+  const [advancedFilter, setAdvancedFilter] =
+    React.useState<AdvancedTransactionsFilterValue>(
+      emptyAdvancedTransactionsFilter,
+    );
   const [submittedParams, setSubmittedParams] = React.useState<
     ApartmentTradeSearchParams[] | null
   >(() => initialParams ?? parseDashboardFilter(defaultFilterValue).params);
@@ -123,12 +134,22 @@ export function TransactionsSearchSection({
   const hasError = query.isError;
   const results = query.data ? [query.data] : [];
   const summary = createDashboardResultSummary({
-    results,
+    results: results.map((result) => ({
+      ...result,
+      items: filterTradesByAdvancedConditions(result.items, submittedFilter),
+    })),
     townNames: submittedFilter.location.townNames,
     transactionType: submittedFilter.transactionType,
   });
 
   const handleSearch = () => {
+    const advancedFilterError =
+      validateAdvancedTransactionFilters(advancedFilter);
+    if (advancedFilterError) {
+      setValidationMessage(advancedFilterError);
+      return;
+    }
+
     const { errorMessage, params } = parseDashboardFilter({
       contractMonth,
       location,
@@ -141,11 +162,44 @@ export function TransactionsSearchSection({
     }
 
     setSubmittedParams(params);
-    setSubmittedFilter({ contractMonth, location, transactionType });
+    setSubmittedFilter({
+      contractMonth,
+      location,
+      transactionType,
+      ...advancedFilter,
+    });
     setSearchRequestId((currentId) => currentId + 1);
   };
 
   const trades = summary.targetTrades;
+  const handleTransactionTypeChange = (nextType: TransactionType) => {
+    setTransactionType(nextType);
+    setAdvancedFilter((current) => ({
+      ...current,
+      ...(nextType === 'sale'
+        ? {
+            minDepositAmount: undefined,
+            maxDepositAmount: undefined,
+            minMonthlyRent: undefined,
+            maxMonthlyRent: undefined,
+          }
+        : {}),
+      ...(nextType === 'jeonse'
+        ? {
+            minDealAmount: undefined,
+            maxDealAmount: undefined,
+            minMonthlyRent: undefined,
+            maxMonthlyRent: undefined,
+          }
+        : {}),
+      ...(nextType === 'monthly-rent'
+        ? {
+            minDealAmount: undefined,
+            maxDealAmount: undefined,
+          }
+        : {}),
+    }));
+  };
   const columnDefs = React.useMemo<ColDef<ApartmentTrade>[]>(
     () => [
       ...(submittedFilter.transactionType === 'all'
@@ -178,8 +232,7 @@ export function TransactionsSearchSection({
       {
         field: 'legalDong',
         headerName: '법정동',
-        flex: 1,
-        width: 100,
+        width: 110,
         minWidth: 100,
         sortable: true,
       },
@@ -197,6 +250,22 @@ export function TransactionsSearchSection({
         minWidth: 120,
         sortable: true,
         valueFormatter: ({ value }) => (value == null ? '-' : `${value}㎡`),
+      },
+      {
+        field: 'floor',
+        headerName: '층',
+        width: 80,
+        minWidth: 70,
+        sortable: true,
+        valueFormatter: ({ value }) => (value == null ? '-' : `${value}층`),
+      },
+      {
+        field: 'buildYear',
+        headerName: '건축년도',
+        width: 105,
+        minWidth: 95,
+        sortable: true,
+        valueFormatter: ({ value }) => (value == null ? '-' : `${value}년`),
       },
       {
         headerName: '계약일',
@@ -220,7 +289,7 @@ export function TransactionsSearchSection({
     <section className="rounded-lg border border-border bg-card p-3 shadow-sm sm:p-4">
       <TransactionTypeSelector
         value={transactionType}
-        onValueChange={setTransactionType}
+        onValueChange={handleTransactionTypeChange}
       />
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2 md:grid-cols-[1fr_1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr_auto]">
@@ -242,15 +311,11 @@ export function TransactionsSearchSection({
         </div>
       </div>
 
-      <div>
-        {/* 상세 조건 입력 필드, 아코디언 ui */}
-        {/* 거래금액(만원): 최소금액, 최대금액 입력 필드, 거래유형 매매일 경우만 표시 */}
-        {/* 보증금(만원): 최소금액, 최대금액 입력 필드, 거래유형 전세 또는 월세일 경우만 표시 */}
-        {/* 월세(만원): 최소금액, 최대금액 입력 필드, 거래유형 월세일 경우만 표시 */}
-        {/* 건축년도: 최소, 최대 입력 필드 */}
-        {/* 전용면적: 최소, 최대 입력 필드 */}
-        {/* 층: 최소, 최대 입력 필드 */}
-      </div>
+      <AdvancedTransactionsFilter
+        transactionType={transactionType}
+        value={advancedFilter}
+        onValueChange={setAdvancedFilter}
+      />
 
       {validationMessage ? (
         <p className="mt-3 text-xs text-red-600 dark:text-red-400">
@@ -289,4 +354,17 @@ export function TransactionsSearchSection({
       ) : null}
     </section>
   );
+}
+
+function getAmountPerSquareMeter(trade?: ApartmentTrade) {
+  if (!trade?.exclusiveArea || trade.exclusiveArea <= 0) {
+    return null;
+  }
+
+  const amount =
+    trade.tradeType === 'sale' || trade.tradeType === 'sale-detail'
+      ? trade.dealAmount
+      : trade.depositAmount;
+
+  return amount === null ? null : amount / trade.exclusiveArea;
 }
